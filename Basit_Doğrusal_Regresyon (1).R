@@ -1,0 +1,90 @@
+# Değerlerin atanma aşaması
+
+x1 <- data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)` # x değerlerinin atanması
+y1 <- ddata_ex_7_2_Voltage_Drop_$`Voltage Drop, yi ` # y değerlerinin atanması
+
+#Regresyon kurallarına göre normallik testi
+
+attach(data_ex_7_2_Voltage_Drop_)
+install.packages("dplyr")
+install.packages("ggpubr")
+library(dplyr)
+library(ggpubr)
+ggdensity(y1, main= "Shear strength",xlab = "Shear strength")
+ggqqplot(y1)
+boxplot((data_ex_7_2_Voltage_Drop_$`Voltage Drop, yi`))
+boxplot(data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)`)
+hist(data_ex_7_2_Voltage_Drop_$`Voltage Drop, yi`)
+hist(data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)`)
+shapiro.test(y1) # Eğer veri seti 50 den küçük ise shapiro wilk testi
+shapiro.test(data_ex_7_2_Voltage_Drop_$`Voltage Drop, yi`)
+shapiro.test(data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)`)
+ks.test(data_ex_7_2_Voltage_Drop_$`Voltage Drop, yi`, mean(data_ex_7_2_Voltage_Drop_$`Voltage Drop, yi`))      # Eğer veri seti 50 den büyük ise kolmogorov-smirnov testi uygulanır
+ks.test(data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)`,mean(data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)`))
+
+#Regresyon modelinin tahminii yapmak
+
+model=lm(y1~x1) # Basit doğrusal regresyon modelini sağlar.
+summary(model) #Modelin özet sonuşlarını gösterir.
+confint(model, level=0.95) #model katsayılarının güven aralıklarını verir.
+plot(data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)`, data_ex_7_2_Voltage_Drop_$`Voltage Drop, yi`) #saçılım grafiğini çizdirir
+cor(data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)`, data_ex_7_2_Voltage_Drop_$`Voltage Drop, yi`) #korelasyon katsayısını buldurur
+abline(model) #grafik üzerinde regresyon doğrusunu çizdirir
+names(model)
+model$fitted.values # regresyon doğrusu üzerinde yer alan nokta ve değerleri gösterir.
+fitted(model)
+prediction=predict(model, interval = "prediction") #kestirim aralıkları uyum değerlerinin alt ve üst sınırlarını verir.
+prediction
+confidence=predict(model, interval = "confidence") # uyum değerleri ve güven aralıklarını verir.
+confidence
+plot(data_ex_7_2_Voltage_Drop_$`Time, xi (seconds)`,model$fitted) #fit (uyum) değerlerin saçılım grafiğini çizdirir.
+coef(model) # regresyon katsayılarını gösterir
+coef(model) [1] #modelin 1. katsayısını verir (bo)
+model$coef[1]+model$coef[2]*1 # x 35 iken y nin alacağı değerleri gösterir
+
+predict(model, list(x1=1)) # x 35 iken y nin alacağı değerleri gösterir
+predict(model, data.frame(x1=1)) # x 35 iken y nin alacağı değerleri gösterir
+predict(model, data.frame(x1=c(1.0 , 3.0 , 5.0))) # birden fazla x değeri için y nin alacağı değerleri gösterir
+predict(model, data.frame(x1=c(1.0 , 3.0 , 5.0)), interval = "confidence", level=0.95) # x in değerleri için y nin değerleri ve  %95 lik güven aralıklarını gösterir
+predict(model, data.frame(x1=c(1.0 , 3.0 , 5.0)), interval = "prediction", level=0.95) # x in değerleri ve y nin uyum değerleri ve alt ve üst sınırlarını gösterir.
+
+confidence = predict(model, interval = "confidence") # güven aralıklarını bulur 
+confidence
+# Korelasyonlar
+cor.test(x1,y1)  # korelasyon testini yapar
+cor.test(x1,y1,alternative = c("two.sided", "less","greater"), method = c("pearson", "kendall", "spearman"), exact = NULL, conf.level = 0.95)
+cor.test(x1,y1,alternative = c("two.sided", "less","greater"), method = c("spearman"), exact = NULL, conf.level = 0.95)
+
+#Kestirim aralıkları grafiklerini çizdirir
+plot(y1~x1)
+X1.sort=sort(unique(x1))
+prediction=predict(model, newdata=data.frame(x1=X1.sort), interval = "prediction")
+prediction
+lines(X1.sort,prediction[,2],lty=2)
+lines(X1.sort,prediction[,3],lty=2)
+plot(y1~x1)
+# Güven aralıkları grafiklerini çizdirir
+X1.sort=sort(unique(x1))
+confidence=predict(model, newdata=data.frame(x1=X1.sort), interval = "confidence")
+confidence
+lines(X1.sort,confidence[,2],lty=2)
+lines(X1.sort,confidence[,3],lty=2)
+# Standart sapmaları bulur
+standatdevx1=sd(x1,na.rm=FALSE) 
+standatdevx1 # x e ait standart sapma
+standatdevy1=sd(y1,na.rm=FALSE)
+standatdevy1 # y e ait standart sapma
+# x ile y arasında kovaryans bağlantısı olup olmadığını saptar
+cov(x1,y1)
+#varyans analizi tablosunu çizer
+anova(model)
+
+uyum =fitted(model)
+uyum
+res=resid(model)
+res
+newd <- data.frame(x1=c(3,6,9,12,13.3625,15,18,21,24))
+k = predict(lm(y1~x1), newd, se.fit = TRUE)
+k
+
+
